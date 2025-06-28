@@ -211,19 +211,19 @@ document.addEventListener('touchend', function (event) {
   lastTouchEnd = now;
 }, false);
 
-function resizeCanvas() {
-    const blockSize = Math.floor(window.innerWidth / COLUMNS); // 1マスのサイズ
-    const height = blockSize * ROWS;
-    const width = blockSize * COLUMNS;
+// function resizeCanvas() {
+//     const blockSize = Math.floor(window.innerWidth / COLUMNS); // 1マスのサイズ
+//     const height = blockSize * ROWS;
+//     const width = blockSize * COLUMNS;
   
-    canvas.width = width;
-    canvas.height = height;
-    context.setTransform(1, 0, 0, 1, 0, 0); // スケーリング前にリセット
-    context.scale(blockSize, blockSize);
-    draw(); // 再描画
-  }
+//     canvas.width = width;
+//     canvas.height = height;
+//     context.setTransform(1, 0, 0, 1, 0, 0); // スケーリング前にリセット
+//     context.scale(blockSize, blockSize);
+//     draw(); // 再描画
+//   }
   
-  // 初回とウィンドウサイズ変更時に実行
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+//   // 初回とウィンドウサイズ変更時に実行
+//   resizeCanvas();
+//   window.addEventListener('resize', resizeCanvas);
   
