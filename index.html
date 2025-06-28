@@ -2,24 +2,23 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>テトリス風ゲーム</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <canvas id="game" width="240" height="400"></canvas>
-    <div id="info">
-      <h2>スコア: <span id="score">0</span></h2>
-      <div id="message"></div>
-      <div id="controls">
-        <button onclick="moveLeft()">←</button>
-        <button onclick="rotatePiece()">⟳</button>
-        <button onclick="moveRight()">→</button>
-        <button onclick="softDrop()">↓</button>
-      </div>
-    </div>
+  <h1>テトリス</h1>
+  <div id="score">スコア: 0</div>
+  <div id="message"></div>
+  <canvas id="game" width="300" height="600"></canvas>
+
+  <div class="controls">
+    <button id="left">←</button>
+    <button id="rotate">⟳</button>
+    <button id="right">→</button>
+    <button id="down">↓</button>
   </div>
+
   <script src="game.js"></script>
 </body>
 </html>

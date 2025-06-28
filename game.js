@@ -1,185 +1,127 @@
-// game.js
+const canvas = document.getElementById("game");
+const context = canvas.getContext("2d");
 
-const canvas = document.getElementById('game');
-const context = canvas.getContext('2d');
-
+const COLS = 10;
 const ROWS = 20;
-const COLUMNS = 10;
+const BLOCK_SIZE = 30;
 
+canvas.width = COLS * BLOCK_SIZE;
+canvas.height = ROWS * BLOCK_SIZE;
+
+let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 let score = 0;
 let gameOver = false;
+let dropCounter = 0;
+let dropInterval = 1000;
+let lastTime = 0;
 
-const SHAPES = {
-  T: [
-    [0, 1, 0],
-    [1, 1, 1],
-  ],
-  O: [
-    [1, 1],
-    [1, 1],
-  ],
-  I: [
-    [1, 1, 1, 1],
-  ],
-  L: [
-    [0, 0, 1],
-    [1, 1, 1],
-  ],
-  J: [
-    [1, 0, 0],
-    [1, 1, 1],
-  ],
-  S: [
-    [0, 1, 1],
-    [1, 1, 0],
-  ],
-  Z: [
-    [1, 1, 0],
-    [0, 1, 1],
-  ]
-};
+const pieces = [
+  [[1, 1, 1], [0, 1, 0]], // T
+  [[0, 2, 2], [2, 2, 0]], // S
+  [[3, 3, 0], [0, 3, 3]], // Z
+  [[4, 4, 4, 4]],         // I
+  [[5, 5], [5, 5]],       // O
+  [[6, 0, 0], [6, 6, 6]], // J
+  [[0, 0, 7], [7, 7, 7]], // L
+];
 
-const COLORS = {
-  T: 'purple',
-  O: 'yellow',
-  I: 'cyan',
-  L: 'orange',
-  J: 'blue',
-  S: 'green',
-  Z: 'red'
-};
-
-function createMatrix(rows, cols) {
-  return Array.from({ length: rows }, () => Array(cols).fill(0));
-}
-
-const field = createMatrix(ROWS, COLUMNS);
-
-function drawMatrix(matrix, offset, color) {
-  matrix.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value) {
-        context.fillStyle = color;
-        context.fillRect(x + offset.x, y + offset.y, 1, 1);
-      }
-    });
-  });
-}
-
-function draw() {
-  context.fillStyle = '#000';
-  context.fillRect(0, 0, COLUMNS, ROWS);
-  drawMatrix(field, { x: 0, y: 0 }, 'gray');
-  if (piece) drawMatrix(piece.matrix, piece.pos, piece.color);
-}
-
-function collide(field, piece) {
-  const { matrix, pos } = piece;
-  for (let y = 0; y < matrix.length; ++y) {
-    for (let x = 0; x < matrix[y].length; ++x) {
-      if (
-        matrix[y][x] &&
-        (field[y + pos.y] && field[y + pos.y][x + pos.x]) !== 0
-      ) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function merge(field, piece) {
-  piece.matrix.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value) {
-        field[y + piece.pos.y][x + piece.pos.x] = value;
-      }
-    });
-  });
-}
-
-function sweep() {
-  let lines = 0;
-  outer: for (let y = field.length - 1; y >= 0; --y) {
-    for (let x = 0; x < field[y].length; ++x) {
-      if (field[y][x] === 0) continue outer;
-    }
-    field.splice(y, 1);
-    field.unshift(Array(COLUMNS).fill(0));
-    lines++;
-  }
-  if (lines > 0) {
-    score += lines * 10;
-    document.getElementById('score').textContent = score;
-  }
-}
-
-function createPiece(type) {
+function createPiece() {
+  const shape = pieces[Math.floor(Math.random() * pieces.length)];
   return {
-    matrix: SHAPES[type],
-    pos: { x: Math.floor(COLUMNS / 2) - Math.floor(SHAPES[type][0].length / 2), y: 0 },
-    color: COLORS[type]
+    x: Math.floor((COLS - shape[0].length) / 2),
+    y: 0,
+    shape: shape
   };
 }
 
-function drop() {
-  if (gameOver) return;
-  piece.pos.y++;
-  if (collide(field, piece)) {
-    piece.pos.y--;
-    merge(field, piece);
-    sweep();
-    piece = createPiece(randomType());
-    if (collide(field, piece)) {
-      document.getElementById('message').textContent = 'ゲームオーバー';
-      gameOver = true;
-    }
-  }
-  dropCounter = 0;
+let current = createPiece();
+
+function drawBlock(x, y, color) {
+  context.fillStyle = color;
+  context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+  context.strokeStyle = "#222";
+  context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+}
+
+const colors = [
+  null, "#FF0D72", "#0DC2FF", "#0DFF72",
+  "#F538FF", "#FF8E0D", "#FFE138", "#3877FF"
+];
+
+function draw() {
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+  board.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if (value) drawBlock(x, y, colors[value]);
+    });
+  });
+
+  current.shape.forEach((row, dy) => {
+    row.forEach((value, dx) => {
+      if (value) drawBlock(current.x + dx, current.y + dy, colors[value]);
+    });
+  });
+}
+
+function collide(board, piece) {
+  return piece.shape.some((row, y) =>
+    row.some((value, x) => {
+      if (value === 0) return false;
+      const px = piece.x + x;
+      const py = piece.y + y;
+      return px < 0 || px >= COLS || py >= ROWS || (py >= 0 && board[py][px]);
+    })
+  );
+}
+
+function merge(board, piece) {
+  piece.shape.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if (value && piece.y + y >= 0) {
+        board[piece.y + y][piece.x + x] = value;
+      }
+    });
+  });
 }
 
 function rotate(matrix) {
   return matrix[0].map((_, i) => matrix.map(row => row[i])).reverse();
 }
 
-function rotatePiece() {
-  if (gameOver) return;
-  const rotated = rotate(piece.matrix);
-  const old = piece.matrix;
-  piece.matrix = rotated;
-  if (collide(field, piece)) piece.matrix = old;
+function drop() {
+  current.y++;
+  if (collide(board, current)) {
+    current.y--;
+    merge(board, current);
+    resetPiece();
+    clearLines();
+    if (collide(board, current)) {
+      gameOver = true;
+      document.getElementById("message").textContent = "ゲームオーバー";
+    }
+  }
+  dropCounter = 0;
 }
 
-function moveLeft() {
-  if (gameOver) return;
-  piece.pos.x--;
-  if (collide(field, piece)) piece.pos.x++;
+function clearLines() {
+  outer: for (let y = ROWS - 1; y >= 0; y--) {
+    if (board[y].every(cell => cell !== 0)) {
+      board.splice(y, 1);
+      board.unshift(Array(COLS).fill(0));
+      score += 100;
+      document.getElementById("score").textContent = `スコア: ${score}`;
+      y++;
+    }
+  }
 }
 
-function moveRight() {
-  if (gameOver) return;
-  piece.pos.x++;
-  if (collide(field, piece)) piece.pos.x--;
+function resetPiece() {
+  current = createPiece();
 }
-
-function softDrop() {
-  if (gameOver) return;
-  drop();
-}
-
-document.addEventListener('keydown', e => {
-  if (gameOver) return;
-  if (e.key === 'ArrowLeft') moveLeft();
-  else if (e.key === 'ArrowRight') moveRight();
-  else if (e.key === 'ArrowDown') softDrop();
-  else if (e.key === 'ArrowUp') rotatePiece();
-});
-
-let dropCounter = 0;
-let dropInterval = 1000;
-let lastTime = 0;
 
 function update(time = 0) {
+  if (gameOver) return;
   const deltaTime = time - lastTime;
   lastTime = time;
   dropCounter += deltaTime;
@@ -190,34 +132,47 @@ function update(time = 0) {
   requestAnimationFrame(update);
 }
 
-function randomType() {
-  const types = Object.keys(SHAPES);
-  return types[Math.floor(Math.random() * types.length)];
-}
-
-function resizeCanvas() {
-  const container = document.getElementById('game-container');
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-
-  const blockW = Math.floor(width / COLUMNS);
-  const blockH = Math.floor(height / ROWS);
-  const blockSize = Math.min(blockW, blockH);
-
-  canvas.width = blockSize * COLUMNS;
-  canvas.height = blockSize * ROWS;
-
-  context.setTransform(1, 0, 0, 1, 0, 0);
-  context.scale(blockSize, blockSize);
-  draw();
-}
-
-window.addEventListener('resize', resizeCanvas);
-
-document.addEventListener('DOMContentLoaded', () => {
-  piece = createPiece(randomType());
-  resizeCanvas();
-  update();
+// 操作処理
+document.addEventListener("keydown", e => {
+  if (gameOver) return;
+  switch (e.key) {
+    case "ArrowLeft":
+      current.x--;
+      if (collide(board, current)) current.x++;
+      break;
+    case "ArrowRight":
+      current.x++;
+      if (collide(board, current)) current.x--;
+      break;
+    case "ArrowDown":
+      drop();
+      break;
+    case "ArrowUp":
+      current.shape = rotate(current.shape);
+      if (collide(board, current)) {
+        current.shape = rotate(rotate(rotate(current.shape)));
+      }
+      break;
+  }
 });
 
-let piece;
+document.getElementById("left").addEventListener("click", () => {
+  current.x--;
+  if (collide(board, current)) current.x++;
+});
+
+document.getElementById("right").addEventListener("click", () => {
+  current.x++;
+  if (collide(board, current)) current.x--;
+});
+
+document.getElementById("down").addEventListener("click", drop);
+
+document.getElementById("rotate").addEventListener("click", () => {
+  current.shape = rotate(current.shape);
+  if (collide(board, current)) {
+    current.shape = rotate(rotate(rotate(current.shape)));
+  }
+});
+
+update();
