@@ -1,10 +1,7 @@
 // game.js
 
 const canvas = document.getElementById('game');
-canvas.width = 10 * 24;  // 横10マス × 24px
-canvas.height = 20 * 24; // 縦20マス × 24px
 const context = canvas.getContext('2d');
-context.scale(24, 24);   // マス単位にスケーリング
 
 const ROWS = 20;
 const COLUMNS = 10;
@@ -198,32 +195,25 @@ function randomType() {
   return types[Math.floor(Math.random() * types.length)];
 }
 
+function resizeCanvas() {
+  const container = document.getElementById('game-container');
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+
+  const blockW = Math.floor(width / COLUMNS);
+  const blockH = Math.floor(height / ROWS);
+  const blockSize = Math.min(blockW, blockH);
+
+  canvas.width = blockSize * COLUMNS;
+  canvas.height = blockSize * ROWS;
+
+  context.setTransform(1, 0, 0, 1, 0, 0);
+  context.scale(blockSize, blockSize);
+  draw();
+}
+
+window.addEventListener('resize', resizeCanvas);
+
 let piece = createPiece(randomType());
+resizeCanvas();
 update();
-
-let lastTouchEnd = 0;
-
-document.addEventListener('touchend', function (event) {
-  const now = new Date().getTime();
-  if (now - lastTouchEnd <= 300) {
-    event.preventDefault(); // ダブルタップをキャンセル
-  }
-  lastTouchEnd = now;
-}, false);
-
-// function resizeCanvas() {
-//     const blockSize = Math.floor(window.innerWidth / COLUMNS); // 1マスのサイズ
-//     const height = blockSize * ROWS;
-//     const width = blockSize * COLUMNS;
-  
-//     canvas.width = width;
-//     canvas.height = height;
-//     context.setTransform(1, 0, 0, 1, 0, 0); // スケーリング前にリセット
-//     context.scale(blockSize, blockSize);
-//     draw(); // 再描画
-//   }
-  
-//   // 初回とウィンドウサイズ変更時に実行
-//   resizeCanvas();
-//   window.addEventListener('resize', resizeCanvas);
-  

@@ -1,65 +1,70 @@
-body {
-    background: #222;
-    color: white;
-    font-family: sans-serif;
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: sans-serif;
+  }
+  
+  body {
+    background: #111;
+    color: #fff;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    overflow: hidden;
   }
-
-  .container {
+  
+  #game-container {
+    width: 100vw;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
   }
   
-  canvas {
-    background: black;
-    border: 2px solid white;
-    touch-action: none;
+  #game {
+    background: #222;
+    display: block;
   }
   
-  #info {
-    margin-top: 10px;
+  #ui {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
     text-align: center;
   }
   
+  #score-area {
+    margin: 10px 0;
+    font-size: 1.2rem;
+  }
+  
   #message {
+    margin-top: 5px;
     color: red;
     font-weight: bold;
-    margin-top: 10px;
   }
   
   #controls {
-    margin-top: 10px;
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
+    margin-top: 10px;
   }
   
   #controls button {
-    padding: 10px;
-    font-size: 18px;
-    border-radius: 5px;
-    border: none;
-    background-color: #444;
+    font-size: 1.5rem;
+    padding: 15px 0;
+    background: #444;
     color: white;
-  }
-  
-  @media (min-width: 600px) {
-    .container {
-      flex-direction: row;
-      gap: 20px;
-    }
-  }
-  
-  button {
+    border: none;
+    border-radius: 5px;
     touch-action: manipulation;
-    user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    -webkit-touch-callout: none;
+  }
+  
+  #controls button:active {
+    background: #666;
   }
   
