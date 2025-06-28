@@ -1,12 +1,22 @@
 const canvas = document.getElementById("game");
 const context = canvas.getContext("2d");
 
-const COLS = 10;
-const ROWS = 20;
-const BLOCK_SIZE = 30;
+let COLS = 10;
+let ROWS = 20;
+let BLOCK_SIZE;
 
-canvas.width = COLS * BLOCK_SIZE;
-canvas.height = ROWS * BLOCK_SIZE;
+function resizeCanvas() {
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  BLOCK_SIZE = Math.floor(width / COLS);
+  canvas.width = COLS * BLOCK_SIZE;
+  canvas.height = ROWS * BLOCK_SIZE;
+}
+resizeCanvas();
+window.addEventListener("resize", () => {
+  resizeCanvas();
+  draw();
+});
 
 let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 let score = 0;
@@ -36,6 +46,11 @@ function createPiece() {
 
 let current = createPiece();
 
+const colors = [
+  null, "#FF0D72", "#0DC2FF", "#0DFF72",
+  "#F538FF", "#FF8E0D", "#FFE138", "#3877FF"
+];
+
 function drawBlock(x, y, color) {
   context.fillStyle = color;
   context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
@@ -43,20 +58,13 @@ function drawBlock(x, y, color) {
   context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 }
 
-const colors = [
-  null, "#FF0D72", "#0DC2FF", "#0DFF72",
-  "#F538FF", "#FF8E0D", "#FFE138", "#3877FF"
-];
-
 function draw() {
   context.clearRect(0, 0, canvas.width, canvas.height);
-
   board.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value) drawBlock(x, y, colors[value]);
     });
   });
-
   current.shape.forEach((row, dy) => {
     row.forEach((value, dx) => {
       if (value) drawBlock(current.x + dx, current.y + dy, colors[value]);
@@ -67,10 +75,12 @@ function draw() {
 function collide(board, piece) {
   return piece.shape.some((row, y) =>
     row.some((value, x) => {
-      if (value === 0) return false;
+      if (!value) return false;
       const px = piece.x + x;
       const py = piece.y + y;
-      return px < 0 || px >= COLS || py >= ROWS || (py >= 0 && board[py][px]);
+      return (
+        px < 0 || px >= COLS || py >= ROWS || (py >= 0 && board[py][px])
+      );
     })
   );
 }
@@ -132,47 +142,29 @@ function update(time = 0) {
   requestAnimationFrame(update);
 }
 
-// 操作処理
 document.addEventListener("keydown", e => {
   if (gameOver) return;
   switch (e.key) {
-    case "ArrowLeft":
-      current.x--;
-      if (collide(board, current)) current.x++;
-      break;
-    case "ArrowRight":
-      current.x++;
-      if (collide(board, current)) current.x--;
-      break;
-    case "ArrowDown":
-      drop();
-      break;
+    case "ArrowLeft": current.x--; if (collide(board, current)) current.x++; break;
+    case "ArrowRight": current.x++; if (collide(board, current)) current.x--; break;
+    case "ArrowDown": drop(); break;
     case "ArrowUp":
       current.shape = rotate(current.shape);
-      if (collide(board, current)) {
-        current.shape = rotate(rotate(rotate(current.shape)));
-      }
+      if (collide(board, current)) current.shape = rotate(rotate(rotate(current.shape)));
       break;
   }
 });
 
 document.getElementById("left").addEventListener("click", () => {
-  current.x--;
-  if (collide(board, current)) current.x++;
+  current.x--; if (collide(board, current)) current.x++;
 });
-
 document.getElementById("right").addEventListener("click", () => {
-  current.x++;
-  if (collide(board, current)) current.x--;
+  current.x++; if (collide(board, current)) current.x--;
 });
-
 document.getElementById("down").addEventListener("click", drop);
-
 document.getElementById("rotate").addEventListener("click", () => {
   current.shape = rotate(current.shape);
-  if (collide(board, current)) {
-    current.shape = rotate(rotate(rotate(current.shape)));
-  }
+  if (collide(board, current)) current.shape = rotate(rotate(rotate(current.shape)));
 });
 
 update();
