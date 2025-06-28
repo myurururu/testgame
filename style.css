@@ -9,7 +9,7 @@ body {
     align-items: center;
     height: 100vh;
   }
-  
+
   .container {
     display: flex;
     flex-direction: column;
@@ -19,6 +19,7 @@ body {
   canvas {
     background: black;
     border: 2px solid white;
+    touch-action: none;
   }
   
   #info {
