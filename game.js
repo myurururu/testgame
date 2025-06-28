@@ -214,6 +214,10 @@ function resizeCanvas() {
 
 window.addEventListener('resize', resizeCanvas);
 
-let piece = createPiece(randomType());
-resizeCanvas();
-update();
+document.addEventListener('DOMContentLoaded', () => {
+  piece = createPiece(randomType());
+  resizeCanvas();
+  update();
+});
+
+let piece;
