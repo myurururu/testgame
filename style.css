@@ -43,9 +43,19 @@ body {
   
   .controls {
     display: flex;
-    flex-direction: column;
     gap: 10px;
     width: 100%;
+  }
+
+  .skill {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+
+  icon {
+    width: 50%;
+    height: 50%;
   }
   
   button {
