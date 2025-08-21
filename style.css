@@ -96,3 +96,7 @@ body {
     }
   }
   
+  #game {
+    width: 300px;      /* 明示的にcanvasのサイズを指定 */
+    height: 600px;
+  }

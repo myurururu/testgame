@@ -3,15 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>テトリス風ゲーム</title>
+  <title>パズルゲーム</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
+  <!-- タイトル画面 -->
+  <div id="title-screen">
+    <h1>サンプルゲーム</h1>
+    <button id="start-button">スタート</button>
+  </div>
+
+  <!-- キャラクター選択画面 -->
+  <div id="character-screen" style="display: none;">
+    <h2>キャラを選択</h2>
+    <button class="character-button" data-chara="アーシャ">アーシャ</button>
+    <button class="character-button" data-chara="エスカ">エスカ</button>
+    <button class="character-button" data-chara="ロジー">ロジー</button>
+    <button class="character-button" data-chara="シャリステラ">シャリステラ</button>
+    <button class="character-button" data-chara="シャルロッテ">シャルロッテ</button>
+  </div>
+
+  <!-- 難易度選択画面 -->
+  <div id="difficulty-screen" style="display: none;">
+    <h2>難易度を選択</h2>
+    <button class="difficulty-button" data-level="easy">Easy</button>
+    <button class="difficulty-button" data-level="normal">Normal</button>
+    <button class="difficulty-button" data-level="hard">Hard</button>
+  </div>
+
+  <div id="game-screen" class="container" style="visibility: hidden;">
     <canvas id="game"></canvas>
     <div class="sidebar">
+      <div id="difficulty">難易度：</div>
       <img src="./img/icon2.png" id="icon">
+      <div id="character"></div>
       <div id="score">スコア: 0</div>
+      <div id="material">入手素材ポイント: 未取得</div>
       <div id="life">ライフ: 3</div>
       <div id="message"></div>
       <div class="controls">
@@ -28,6 +55,7 @@
       </div>
     </div>
   </div>
+  <script src="title.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
