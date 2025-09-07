@@ -19,12 +19,13 @@ startButton.addEventListener("click", () => {
 charaButtons.forEach(button => {
     button.addEventListener("click", () => {
         selectedCharacter = button.dataset.chara;
-        document.getElementById("character").textContent = selectedCharacter;
+        document.getElementById("character1").textContent = "ウィルベル";
+        document.getElementById("character2").textContent = "パティ";
+        document.getElementById("character3").textContent = "アーシャ";
         characterScreen.style.display = "none";//キャラ選択を非表示
         difficultyScreen.style.display = "block";//難易度選択を表示
   });
 });
-
 
 //難易度選択時のイベント
 difficultyButtons.forEach(button => {
@@ -32,7 +33,9 @@ difficultyButtons.forEach(button => {
         selectedDifficulty = button.dataset.level;
         difficultyScreen.style.display = "none";//難易度選択を非表示
         gameScreen.style.visibility = "visible";//ゲーム画面を表示
+        gameScreen.style.display = "flex";//ゲーム画面を表示
         document.getElementById("difficulty").textContent = selectedDifficulty;
+        startGame(selectedDifficulty);
   });
 });
 

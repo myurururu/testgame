@@ -53,11 +53,31 @@ body {
     width: 100%;
   }
 
-  icon {
-    width: 50%;
-    height: 50%;
+  .icon-row {
+    display: flex;
+    gap: 8px; /* 画像の間隔（お好みで調整） */
+    margin: 10px 0;
   }
-  
+
+  .icon-row .icon {
+    width: 130px; /* 画像サイズ（必要に応じて調整） */
+    height: auto;
+  }
+
+  #character-names {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  #character-names > div {
+    width: 120px;
+    text-align: center;
+    font-size: 14px;
+    color: white;
+  }
+
   button {
     font-size: 1rem;
     padding: 10px 20px;

@@ -8,24 +8,22 @@
 </head>
 <body>
   <!-- タイトル画面 -->
-  <div id="title-screen">
+  <div id="title-screen" style="display: block;">
     <h1>サンプルゲーム</h1>
     <button id="start-button">スタート</button>
   </div>
 
   <!-- キャラクター選択画面 -->
   <div id="character-screen" style="display: none;">
-    <h2>キャラを選択</h2>
-    <button class="character-button" data-chara="アーシャ">アーシャ</button>
-    <button class="character-button" data-chara="エスカ">エスカ</button>
-    <button class="character-button" data-chara="ロジー">ロジー</button>
-    <button class="character-button" data-chara="シャリステラ">シャリステラ</button>
-    <button class="character-button" data-chara="シャルロッテ">シャルロッテ</button>
+    <h2>キャラを選択※素材準備中のためキャラ固定</h2>
+    <button class="character-button" data-chara="キャラA">キャラA</button>
+    <button class="character-button" data-chara="キャラB">キャラB</button>
+    <button class="character-button" data-chara="キャラC">キャラC</button>
   </div>
 
   <!-- 難易度選択画面 -->
   <div id="difficulty-screen" style="display: none;">
-    <h2>難易度を選択</h2>
+    <h2>難易度を選択※難易度調整中</h2>
     <button class="difficulty-button" data-level="easy">Easy</button>
     <button class="difficulty-button" data-level="normal">Normal</button>
     <button class="difficulty-button" data-level="hard">Hard</button>
@@ -35,27 +33,42 @@
     <canvas id="game"></canvas>
     <div class="sidebar">
       <div id="difficulty">難易度：</div>
-      <img src="./img/icon2.png" id="icon">
-      <div id="character"></div>
+      <div class="icon-row">
+        <img src="./img/icon1.png" class="icon">
+        <img src="./img/icon2.png" class="icon">
+        <img src="./img/icon3.png" class="icon">
+      </div>
+      <div id="character-names">
+        <div id="character1"></div>
+        <div id="character2"></div>
+        <div id="character3"></div>
+      </div>
+      <div id="life">ライフ: 3</div>
       <div id="score">スコア: 0</div>
       <div id="material">入手素材ポイント: 未取得</div>
-      <div id="life">ライフ: 3</div>
       <div id="message"></div>
       <div class="controls">
         <button id="left">←</button>
-        <button id="rotate">⟳</button>
         <button id="right">→</button>
         <button id="down">↓</button>
+        <button id="topDown">⇓</button>
+        <button id="rotate">⟳</button>
       </div>
       <div class="skill">
-        <button id="skill">skill1</button>
-        <button id="skill">skill2</button>
-        <button id="skill">skill3</button>
-        <button id="unikeskill">skill4</button>
+        <button id="skill1">skill1</button>
+        <button id="skill2">skill2</button>
+        <button id="unikeskill1">charaSkill1</button>
+        <button id="unikeskill2">charaSkill2</button>
+        <button id="unikeskill3">charaSkill3</button>
       </div>
+    </div>
+    <div id="gameover-menu" style="display: none;">
+      <button id="retry-button">もう一度プレイ</button>
+      <button id="title-button">タイトルに戻る</button>
     </div>
   </div>
   <script src="title.js"></script>
+  <script src="skill.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

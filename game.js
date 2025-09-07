@@ -16,6 +16,7 @@ let dropCounter = 0;
 let dropInterval = 1000; // 落下間隔（ミリ秒）
 let lastTime = 0;
 let difficulty = "未選択";
+let playerHp = 3;
 
 // 各ピースの定義（数値は色のインデックス）
 const pieces = [
@@ -34,10 +35,27 @@ const colors = [
   ];
 // ピースの表示名
 const colorNames = [
-  null, "赤", "青", "緑", "紫", "オレンジ", "黄", "紺"
+  null, "鉱石", "植物", "水", "布", "骨", "回復", "毒"
 ];
-  
-  
+// ピースのイメージ画像を設定
+const picesImages = [
+  null,
+  new Image(),
+  new Image(),
+  new Image(),
+  new Image(),
+  new Image(),
+  new Image(),
+  new Image(),
+]
+// パス指定
+picesImages[1].src = "./img/pice1.png"
+picesImages[2].src = "./img/pice2.png"
+picesImages[3].src = "./img/pice3.png"
+picesImages[4].src = "./img/pice4.png"
+picesImages[5].src = "./img/pice5.png"
+picesImages[6].src = "./img/pice6.png"
+picesImages[7].src = "./img/pice7.png"
 
 let current = createPiece(); // 現在操作中のピース
 resizeCanvas();
@@ -47,9 +65,18 @@ function startGame(difficulty) {
     console.log("ゲームスタート - 難易度:", difficulty);
   
     score = 0;
+    playerHp = 3;
     gameOver = false;
     dropCounter = 0;
-    dropInterval = 300; // 落下間隔（ミリ秒）
+    if (difficulty == "easy"){
+      dropInterval = 1500; // 落下間隔（ミリ秒）
+    }
+    if (difficulty == "normal"){
+      dropInterval = 800; // 落下間隔（ミリ秒）
+    }
+    if (difficulty == "hard"){
+      dropInterval = 300; // 落下間隔（ミリ秒）
+    }
     lastTime = 0;
     for (let i = 1; i <= 7; i++) {
       materialCounts[i] = 0;
@@ -59,7 +86,9 @@ function startGame(difficulty) {
     board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     
     current = createPiece();
+    document.getElementById("life").textContent = "ライフ: 3";
     document.getElementById("score").textContent = "スコア: 0";
+    document.getElementById("material").textContent = "入手素材ポイント: 未取得";
     document.getElementById("message").textContent = "";
     resizeCanvas(); // 表示状態でcanvasを初期化
     draw();         // 再描画
@@ -84,12 +113,16 @@ window.addEventListener("resize", () => {
 function createPiece() {
   const baseShape = pieces[Math.floor(Math.random() * pieces.length)];
 
+  // 重みづけしたランダムインデックス
+  const weightedColors = [1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 7, 1, 2, 3, 4, 5, 7];
+
   // ランダム色インデックスを各ブロックに割り当て
   const shape = baseShape.map(row =>
     row.map(cell => {
       if (cell) {
         // 色インデックス1〜7の中からランダムに選ぶ
-        return Math.floor(Math.random() * (colors.length - 1)) + 1;
+        // return Math.floor(Math.random() * (colors.length - 1)) + 1;
+        return weightedColors[Math.floor(Math.random() * weightedColors.length)];
       } else {
         // 空白（0）のまま
         return 0;
@@ -104,29 +137,42 @@ function createPiece() {
   };
 }
 
-// ブロック（マス）を描画
-function drawBlock(x, y, color) {
-  context.fillStyle = color;
-  context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-  context.strokeStyle = "#222"; // 枠線
+// ブロックのピース描画
+function drawBlock(x, y, colorIndex) {
+  const img = picesImages[colorIndex];
+  if (img && img.complete) {
+    context.drawImage(img, x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+  } else {
+    // 読み込み前は仮の枠を表示
+    context.fillStyle = "#444";
+    context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+  }
+  context.strokeStyle = "#222";
   context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 }
+
 
 // 盤面と現在のピースを描画
 function draw() {
   context.clearRect(0, 0, canvas.width, canvas.height); // 画面クリア
   board.forEach((row, y) => {
     row.forEach((value, x) => {
-      if (value) drawBlock(x, y, colors[value]); // 固定されたブロックを描画
+      // if (value) drawBlock(x, y, colors[value]); // 固定されたブロックを描画
+      if (value) drawBlock(x, y, value); // 固定されたブロックを描画
     });
   });
   current.shape.forEach((row, dy) => {
     row.forEach((value, dx) => {
-      if (value) drawBlock(current.x + dx, current.y + dy, colors[value]); // 操作中のピースを描画
+      // if (value) drawBlock(current.x + dx, current.y + dy, colors[value]); // 操作中のピースを描画
+      if (value) drawBlock(current.x + dx, current.y + dy, value); // 操作中のピースを描画
     });
   });
 }
 
+// ゲームオーバー時のメニュー表示
+function showGameOverMenu() {
+  document.getElementById("gameover-menu").style.display = "block";
+}
 // ピースが盤面と衝突しているかを判定
 function collide(board, piece) {
   return piece.shape.some((row, y) =>
@@ -168,10 +214,29 @@ function drop() {
     if (collide(board, current)) { // 新しいピースが即座に衝突するならゲームオーバー
       gameOver = true;
       document.getElementById("message").textContent = "ゲームオーバー";
+      showGameOverMenu();
     }
   }
   dropCounter = 0;
 }
+
+// 即座に落下、次のピースへ
+function hardDrop() {
+  while (!collide(board, current)) {
+    current.y++;
+  }
+  current.y--; // 最後に衝突した位置に戻す
+  merge(board, current);
+  resetPiece();
+  clearLines();
+  if (collide(board, current)) {
+    gameOver = true;
+    document.getElementById("message").textContent = "ゲームオーバー";
+    showGameOverMenu();
+  }
+  draw(); // 描画更新
+}
+
 
 // 揃ったラインを削除しスコア加算 消したピースの属性毎加算
 function clearLines() {
@@ -186,22 +251,43 @@ function clearLines() {
         console.log("colorIndex:", colorIndex);
         console.log("materialCounts:", materialCounts);
       }
-      // カウント用の変数に加算
-      let colorScoreText = "入手素材ポイント: ";
-      for (let i = 1; i < colors.length; i++) {
-        if (materialCounts[i] > 0) {
-          colorScoreText += `${colorNames[i]}${materialCounts[i]} `;
-        }
+      // 回復&ダメージ計算
+      // ライフ回復
+      if (materialCounts[6] > 0){
+        playerHp += materialCounts[6];
+        materialCounts[6] = 0;
       }
-
+      // 毒ダメージ
+      if (materialCounts[7] > 0){
+        playerHp -= materialCounts[7];
+        materialCounts[7] = 0;
+      }      
       board.splice(y, 1); // その行を削除
       board.unshift(Array(COLS).fill(0)); // 一番上に空行追加
       score += 100;
+      document.getElementById("life").textContent = `ライフ: ${playerHp}`;
       document.getElementById("score").textContent = `スコア: ${score}`;
-      document.getElementById("material").textContent = colorScoreText.trim();
+      updatePoint(); // 素材のポイントを画面の出力に反映
       y++; // 同じ行を再確認（連続で消せる場合）
     }
   }
+  if (playerHp <= 0) { // ライフが０以下ならゲームオーバー
+    gameOver = true;
+    document.getElementById("message").textContent = "ゲームオーバー";
+    showGameOverMenu();
+  }
+  draw(); // 描画
+}
+
+function updatePoint(){
+  // カウント用の変数に加算
+  let colorScoreText = "入手素材ポイント: ";
+  for (let i = 1; i < colors.length; i++) {
+    if (materialCounts[i] > 0) {
+      colorScoreText += `${colorNames[i]}${materialCounts[i]} `;
+    }
+  }
+  document.getElementById("material").textContent = colorScoreText.trim();
 }
 
 // 新しいピースを生成
@@ -248,6 +334,34 @@ document.addEventListener("keydown", e => {
         current.shape = rotate(rotate(rotate(current.shape)));
       }
       break;
+    case "a":
+    case "A":
+      console.log("回復スキル呼び出し");
+      normalAcftion1();
+      break;
+    case "s":
+    case "S":
+      console.log("スコアスキル呼び出し");
+      normalAcftion2();
+      break;
+    case "d":
+    case "D":
+      console.log("キャラスキル呼び出し");
+      charaAcftion1();
+      break;
+    case "f":
+    case "F":
+      console.log("キャラスキル呼び出し");
+      charaAcftion2();
+      break;
+    case "g":
+    case "G":
+      console.log("キャラスキル呼び出し");
+      charaAcftion3();
+      break;
+    case "Enter":
+      hardDrop();
+      break;
   }
 });
 
@@ -267,4 +381,34 @@ document.getElementById("rotate").addEventListener("click", () => {
     current.shape = rotate(rotate(rotate(current.shape)));
   }
 });
+
+document.getElementById("skill1").addEventListener("click", () => {
+  normalAcftion1();
+});
+document.getElementById("skill2").addEventListener("click", () => {
+  normalAcftion2();
+});
+document.getElementById("unikeskill1").addEventListener("click", () => {
+  charaAcftion1();
+});
+document.getElementById("unikeskill2").addEventListener("click", () => {
+  charaAcftion2();
+});
+document.getElementById("unikeskill3").addEventListener("click", () => {
+  charaAcftion3();
+});
+
+document.getElementById("retry-button").addEventListener("click", () => {
+  document.getElementById("gameover-menu").style.display = "none";
+  startGame(difficulty); // 難易度は前回選択されたものを再利用
+});
+
+document.getElementById("title-button").addEventListener("click", () => {
+  document.getElementById("gameover-menu").style.display = "none";
+  document.getElementById("game-screen").style.visibility = "hidden";
+  document.getElementById("game-screen").style.display = "none";
+  document.getElementById("title-screen").style.visibility = "visible";
+  document.getElementById("title-screen").style.display = "block";
+});
+
 
